@@ -1,13 +1,14 @@
 package com.suxia.cc.redis.test;
 
 
+import com.suxia.cc.redis.client.RedisLockClient;
 import com.suxia.cc.redis.constant.KeyUtil;
+import com.suxia.cc.redis.constant.RedisConstant;
 import com.suxia.cc.redis.exception.RedisClientException;
-import com.suxia.cc.redis.lock.RedisLockClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,15 +19,13 @@ import java.util.Map;
  * @description TODO
  * @date 2020/4/23 18:00
  */
-@Service
-public class RedisLockClientImpl {
+@Component
+public class RedisLockClientService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RedisLockClientImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RedisLockClientService.class);
 
     @Autowired
-    private RedisLockClient redisLock;
-
-    private static final Long TIMEOUT = 30 * 1000L;// 超时时间 30s
+    private RedisLockClient redisLockClient;
 
     /**
      * 活动，特价，限量100000份
@@ -65,11 +64,12 @@ public class RedisLockClientImpl {
     //多台机器上多个线程对一个数据进行操作的互斥。
     //Redis是单线程的!!!
     public void orderProductMocckDiffUser(String productId) {//解决方法一:synchronized锁方法是可以解决的，但是请求会变慢,请求变慢是正常的。主要是没做到细粒度控制。比如有很多商品的秒杀，但是这个把所有商品的秒杀都锁住了。而且这个只适合单机的情况，不适合集群
+        String uniqueValue = KeyUtil.getUniqueValue();
         try {
             //加锁
-            if (!redisLock.lock(productId, String.valueOf(System.currentTimeMillis()))) {
-                LOG.info("很抱歉，人太多了，换个姿势再试试~~");
-                throw new RedisClientException("很抱歉，人太多了，换个姿势再试试~~");
+            if (!redisLockClient.lock(productId, uniqueValue, RedisConstant.DEFAULT_EXPIRE_TIME, RedisConstant.DEFAULT_TRY_LOCK_TIMEOUT)) {
+                LOG.info("服务器繁忙，请稍后重试");
+                throw new RedisClientException("服务器繁忙，请稍后重试");
             }
 
             //1.查询该商品库存，为0则活动结束
@@ -81,8 +81,18 @@ public class RedisLockClientImpl {
                 orders.put(KeyUtil.getUniqueKey(), productId);
                 //3.减库存
                 stockNum = stockNum - 1;//不做处理的话，高并发下会出现超卖的情况，下单数，大于减库存的情况。虽然这里减了，但由于并发，减的库存还没存到map中去。新的并发拿到的是原来的库存
+
+                // 再次获取锁
+                Boolean lock = redisLockClient.lock(productId, uniqueValue, RedisConstant.DEFAULT_EXPIRE_TIME, RedisConstant.DEFAULT_TRY_LOCK_TIMEOUT);
+                if (lock) {
+                    LOG.info("再次获取锁成功");
+                } else {
+                    LOG.info("再次获取锁失败");
+                    throw new RedisClientException("再次获取锁失败");
+                }
+
                 try {
-                    Thread.sleep(3000);//模拟减库存的处理时间
+                    Thread.sleep(3000); // 模拟减库存的处理时间
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -93,8 +103,7 @@ public class RedisLockClientImpl {
             throw new RedisClientException(e.getMessage());
         } finally {
             //解锁
-            redisLock.unlock(productId, String.valueOf(System.currentTimeMillis()));
+            redisLockClient.unlock(productId, uniqueValue);
         }
-
     }
 }

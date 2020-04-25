@@ -9,8 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
-
 /**
  * @author cczhaoyc@163.com
  * @version v_1.0.0
@@ -19,7 +17,7 @@ import java.util.UUID;
  */
 
 @Component
-public class MyRedisLockClient {
+public class IRedisLockClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(RedisLock.class);
 
@@ -29,32 +27,18 @@ public class MyRedisLockClient {
     /**
      *  Redis加锁的操作
      */
-    public Boolean lock(String key, String value, Long tryLockTimeout) {
-        tryLockTimeout = System.currentTimeMillis() + tryLockTimeout;
-        while (System.currentTimeMillis() < tryLockTimeout) {
-            // setIfAbsent(),如果键不存在则新增,存在则不改变已经有的值
-            if (Boolean.TRUE.equals(redisClient.setIfAbsent(key, value, RedisConstant.DEFAULT_LOCK_EXPIRE_2_MINUTES))) {
-                LOG.info("第一次获取锁");
-                return Boolean.TRUE;
-            }
-            String currentValue = redisClient.get(key, String.class);
-            if (StringUtils.isNotEmpty(currentValue) && currentValue.equals(value)) {
-                // 获取上一个锁的时间,如果高并发的情况可能会出现已经被修改的问题,所以多一次判断保证线程的安全
-//            String oldValue = redisClient.get(key, String.class);
-                String oldValue = redisClient.getAndSet(key, value, RedisConstant.DEFAULT_LOCK_EXPIRE_2_MINUTES);
-                if (StringUtils.isNotEmpty(oldValue) && oldValue.equals(currentValue)) {
-                    LOG.info("重入锁");
-                    return Boolean.TRUE;
-                }
-            }
-        /*String currentValue = redisClient.get(key, String.class);
+    public Boolean lock(String key, String value) {
+        // setIfAbsent(),如果键不存在则新增,存在则不改变已经有的值
+        if (Boolean.TRUE.equals(redisClient.setIfAbsent(key, value, RedisConstant.DEFAULT_LOCK_EXPIRE_2_MINUTES))) {
+            return Boolean.TRUE;
+        }
+        String currentValue = redisClient.get(key, String.class);
         if (StringUtils.isNotEmpty(currentValue) && Long.parseLong(currentValue) < System.currentTimeMillis()) {
             // 获取上一个锁的时间,如果高并发的情况可能会出现已经被修改的问题,所以多一次判断保证线程的安全
             String oldValue = redisClient.getAndSet(key, value, RedisConstant.DEFAULT_EXPIRE_TIME);
             if (StringUtils.isNotEmpty(oldValue) && oldValue.equals(currentValue)) {
                 return Boolean.TRUE;
             }
-        }*/
         }
         return Boolean.FALSE;
     }
@@ -67,8 +51,7 @@ public class MyRedisLockClient {
         try {
             if (StringUtils.isNotEmpty(currentValue) && currentValue.equals(value)) {
                 redisClient.remove(key);
-                LOG.info("释放redis分布式锁成功------------------------------");
-
+                LOG.info("释放redis分布式锁成功");
             }
         } catch (Exception e) {
             throw new RedisClientException("Redis解锁异常", e);

@@ -310,7 +310,7 @@ public interface RedisClient {
     Boolean setIfAbsent(String key, String value, Long expireTime);
 
     /**
-     * 获取旧值并设置新值
+     * 获取旧值并设置新值，并设置过期时间
      */
     String getAndSet(String key, String value, Long newExpireTime);
 

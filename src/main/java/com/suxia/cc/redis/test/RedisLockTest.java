@@ -1,6 +1,7 @@
 package com.suxia.cc.redis.test;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,35 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class RedisLockTest {
 
     @Autowired
-    private RenewalRedisLockImpl renewalRedisLock;
-    @Autowired
-    private SeckillServiceImpl seckillService;
-    @Autowired
-    private RedisLockClientImpl redisLockClient;
-    @Autowired
-    private MyRedisLockClientImpl myRedisLockClient;
+    private RedisLockClientService redisLockClient;
 
-    @RequestMapping("/orderProductMocckDiffUser")
-    public String orderProductMocckDiffUser(String productId) {
-        seckillService.orderProductMocckDiffUser(productId);
-        return "success";
-    }
-
-    @RequestMapping("/renewalRedisLock")
-    public String renewalRedisLock(String productId) {
-        renewalRedisLock.orderProductMocckDiffUser(productId);
-        return "success";
-    }
-
-    @RequestMapping("/redisLockClient")
-    public String redisLockClient(String productId) {
-        redisLockClient.orderProductMocckDiffUser(productId);
-        return "success";
-    }
-
-    @RequestMapping("/myRedisLockClient")
+    @PostMapping("/myRedisLockClient")
     public String myRedisLockClient(String productId) {
-        myRedisLockClient.orderProductMocckDiffUser(productId);
+        redisLockClient.orderProductMocckDiffUser(productId);
         return "success";
     }
 }

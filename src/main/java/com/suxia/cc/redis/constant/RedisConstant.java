@@ -11,6 +11,11 @@ import java.util.concurrent.TimeUnit;
 public interface RedisConstant {
 
     /**
+     * key分隔符
+     */
+    String DELIMITER = ":";
+
+    /**
      * 默认缓存失效时间2小时
      */
     Long DEFAULT_EXPIRE_TIME = TimeUnit.HOURS.toSeconds(2);
@@ -26,7 +31,8 @@ public interface RedisConstant {
     Long DEFAULT_LOCK_EXPIRE_2_MINUTES = TimeUnit.MINUTES.toSeconds(2);
 
     /**
-     * key分隔符
+     * 默认获取锁超时时间5秒
      */
-    String DELIMITER = ":";
+    Long DEFAULT_TRY_LOCK_TIMEOUT = 5 * 1000L;
+
 }
