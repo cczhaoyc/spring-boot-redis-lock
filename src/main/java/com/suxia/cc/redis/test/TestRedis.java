@@ -31,7 +31,7 @@ public class TestRedis {
     @Autowired
     private RedisClient redisClient;
 
-    @PostMapping("/set")
+    @PostMapping("/put")
     public Map<String, Object> put(String key, String value) {
         boolean set = redisClient.put(key, value, RedisConstant.DEFAULT_EXPIRE_TIME);
         long expire = redisClient.getExpire(key);

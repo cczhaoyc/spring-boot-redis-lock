@@ -29,7 +29,7 @@ public interface RedisClient {
      * @param expireTime 缓存失效时间
      * @ return   Boolean.TRUE成功, false失败
      */
-    Boolean put(String key, String value, Long expireTime);
+//    Boolean put(String key, String value, Long expireTime);
 
     /**
      * 缓存字符串，缓存默认失效时间2小时

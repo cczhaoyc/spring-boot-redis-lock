@@ -88,7 +88,7 @@ public class RedisClientImpl implements RedisClient {
      * @param expireTime 缓存失效时间
      * @ return   Boolean.TRUE成功, false失败
      */
-    @Override
+    /*@Override
     public Boolean put(String key, String value, Long expireTime) {
         this.verifyKeyAadExpireTime(key, expireTime);
         try {
@@ -98,7 +98,7 @@ public class RedisClientImpl implements RedisClient {
             LOG.error(e.getMessage(), e);
             return Boolean.FALSE;
         }
-    }
+    }*/
 
     /**
      * 缓存字符串，缓存默认失效时间2小时
