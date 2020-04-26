@@ -1,4 +1,4 @@
-package com.suxia.cc.redis.constant;
+package com.suxia.cc.redis.util;
 
 import java.util.UUID;
 

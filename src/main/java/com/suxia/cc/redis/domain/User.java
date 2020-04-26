@@ -11,6 +11,7 @@ import java.io.Serializable;
 public class User implements Serializable {
 
     private static final long serialVersionUID = 7512115895509187986L;
+
     private String name;
     private Integer age;
     private String birthday;

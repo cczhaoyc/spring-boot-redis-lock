@@ -81,34 +81,14 @@ public class RedisClientImpl implements RedisClient {
     }
 
     /**
-     * 缓存字符串并设置时间
-     *
-     * @param key        键
-     * @param value      值
-     * @param expireTime 缓存失效时间
-     * @ return   Boolean.TRUE成功, false失败
-     */
-    /*@Override
-    public Boolean put(String key, String value, Long expireTime) {
-        this.verifyKeyAadExpireTime(key, expireTime);
-        try {
-            redisTemplate.opsForValue().set(this.getRedisKeyAll(key), JSON.toJSONString(value, SerializerFeature.WriteClassName), expireTime, TimeUnit.SECONDS);
-            return Boolean.TRUE;
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-            return Boolean.FALSE;
-        }
-    }*/
-
-    /**
      * 缓存字符串，缓存默认失效时间2小时
      *
      * @param key   键
      * @param value 值
-     * @ return   Boolean.TRUE成功, false失败
+     * @ return   true成功, false失败
      */
     @Override
-    public Boolean put(String key, String value) {
+    public <T> Boolean put(String key, T value) {
         this.verifyKeyAadExpireTime(key);
         try {
             redisTemplate.opsForValue().set(this.getRedisKeyAll(key), JSON.toJSONString(value, SerializerFeature.WriteClassName), RedisConstant.DEFAULT_EXPIRE_TIME, TimeUnit.SECONDS);
@@ -124,8 +104,8 @@ public class RedisClientImpl implements RedisClient {
      *
      * @param key        键
      * @param value      值
-     * @param expireTime 时间(秒)
-     * @ return   Boolean.TRUE成功 false 失败
+     * @param expireTime 缓存失效时间（秒）
+     * @ return   true成功 false 失败
      */
     @Override
     public <T> Boolean put(String key, T value, Long expireTime) {
@@ -219,20 +199,6 @@ public class RedisClientImpl implements RedisClient {
     }
 
     /**
-     * 删除缓存
-     */
-    @Override
-    public void remove(String key) {
-        this.verifyKeyAadExpireTime(key);
-        try {
-            redisTemplate.delete(this.getRedisKeyAll(key));
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
-    }
-
-
-    /**
      * 递增
      *
      * @param key   键
@@ -312,7 +278,7 @@ public class RedisClientImpl implements RedisClient {
      *
      * @param key 键
      * @param map 对应多个键值
-     * @ return   Boolean.TRUE成功, false失败
+     * @ return   true成功, false失败
      */
     @Override
     public Boolean hashPutAll(String key, Map<String, Object> map) {
@@ -332,7 +298,7 @@ public class RedisClientImpl implements RedisClient {
      * @param key        键
      * @param map        对应多个键值
      * @param expireTime 时间(秒)
-     * @ return   Boolean.TRUE成功, false失败
+     * @ return   true成功, false失败
      */
     @Override
     public Boolean hashPutAll(String key, Map<String, Object> map, Long expireTime) {
@@ -375,7 +341,7 @@ public class RedisClientImpl implements RedisClient {
      * @param item       项
      * @param value      值
      * @param expireTime 时间(秒)  注意:如果已存在的hash表有时间,这里将会替换原有的时间
-     * @ return   Boolean.TRUE成功, false失败
+     * @ return   true成功, false失败
      */
     @Override
     public Boolean hashPut(String key, String item, Object value, Long expireTime) {
@@ -602,7 +568,7 @@ public class RedisClientImpl implements RedisClient {
 
 
     /**
-     * 将list放入缓存
+     * 将list放入缓存，并设置过期时间
      *
      * @param key        键
      * @param value      值

@@ -36,9 +36,10 @@ public class RedisConfig extends CachingConfigurerSupport {
         redisTemplate.setKeySerializer(stringRedisSerializer);
         redisTemplate.setHashKeySerializer(stringRedisSerializer);
         // value使用fastJson序列化
-        GenericFastJsonRedisSerializer genericFastJsonRedisSerializer = new GenericFastJsonRedisSerializer();
-        redisTemplate.setValueSerializer(genericFastJsonRedisSerializer);
-        redisTemplate.setHashValueSerializer(genericFastJsonRedisSerializer);
+//        GenericFastJsonRedisSerializer genericFastJsonRedisSerializer = new GenericFastJsonRedisSerializer();
+        FastJsonRedisSerializer<Object> fastJsonRedisSerializer = new FastJsonRedisSerializer<>(Object.class);
+        redisTemplate.setValueSerializer(fastJsonRedisSerializer);
+        redisTemplate.setHashValueSerializer(fastJsonRedisSerializer);
     }
 
 }

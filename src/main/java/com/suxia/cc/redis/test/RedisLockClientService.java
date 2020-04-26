@@ -2,7 +2,7 @@ package com.suxia.cc.redis.test;
 
 
 import com.suxia.cc.redis.client.RedisLockClient;
-import com.suxia.cc.redis.constant.KeyUtil;
+import com.suxia.cc.redis.util.KeyUtil;
 import com.suxia.cc.redis.constant.RedisConstant;
 import com.suxia.cc.redis.exception.RedisClientException;
 import org.slf4j.Logger;

@@ -1,6 +1,5 @@
 package com.suxia.cc.redis.test;
 
-import ch.qos.logback.core.net.SyslogOutputStream;
 import com.suxia.cc.redis.client.RedisClient;
 import com.suxia.cc.redis.constant.RedisConstant;
 import com.suxia.cc.redis.domain.User;
@@ -9,9 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import sun.applet.Main;
 
-import java.lang.reflect.MalformedParameterizedTypeException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -41,8 +38,8 @@ public class TestRedis {
         return map;
     }
 
-    @GetMapping("/get")
-    public String get(String key) {
+    @GetMapping("/getString")
+    public String getString(String key) {
         return this.redisClient.get(key, String.class);
     }
 
@@ -51,15 +48,13 @@ public class TestRedis {
         User user = new User();
         user.setName("苏夏");
         user.setAge(20);
-        ZonedDateTime zdt = ZonedDateTime.now();
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:ss", Locale.CHINA);
-        String birthday = dateTimeFormatter.format(zdt);
-        user.setBirthday(birthday);
+        user.setBirthday("1995-10-18");
         Boolean set = redisClient.put("suxia:obb", user, RedisConstant.DEFAULT_EXPIRE_TIME);
         long expire = redisClient.getExpire("suxia:obb");
         Map<String, Object> map = new HashMap<>();
         map.put("set", set);
         map.put("expire", expire);
+        map.put("user", this.redisClient.get("suxia:obb", User.class));
         return map;
     }
 

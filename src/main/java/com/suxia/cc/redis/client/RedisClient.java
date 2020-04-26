@@ -22,23 +22,13 @@ public interface RedisClient {
     <T> T get(String key, Class<T> clazz);
 
     /**
-     * 缓存字符串并设置时间
-     *
-     * @param key        键
-     * @param value      值
-     * @param expireTime 缓存失效时间
-     * @ return   Boolean.TRUE成功, false失败
-     */
-//    Boolean put(String key, String value, Long expireTime);
-
-    /**
-     * 缓存字符串，缓存默认失效时间2小时
+     * 缓存字符串，默认缓存失效时间2小时
      *
      * @param key   键
      * @param value 值
-     * @ return   Boolean.TRUE成功, false失败
+     * @ return   true成功, false失败
      */
-    Boolean put(String key, String value);
+    <T> Boolean put(String key, T value);
 
     /**
      * 普通缓存放入并设置时间
@@ -46,7 +36,7 @@ public interface RedisClient {
      * @param key        键
      * @param value      值
      * @param expireTime 时间(秒)
-     * @ return   Boolean.TRUE成功 false 失败
+     * @ return   true成功 false 失败
      */
     <T> Boolean put(String key, T value, Long expireTime);
 
@@ -80,11 +70,6 @@ public interface RedisClient {
      * @param key 可以传一个值或多个
      */
     void remove(String... key);
-
-    /**
-     * 删除缓存
-     */
-    void remove(String key);
 
     /**
      * 递增
@@ -124,7 +109,7 @@ public interface RedisClient {
      *
      * @param key 键
      * @param map 对应多个键值
-     * @ return   Boolean.TRUE成功, false失败
+     * @ return   true成功, false失败
      */
     Boolean hashPutAll(String key, Map<String, Object> map);
 
@@ -134,7 +119,7 @@ public interface RedisClient {
      * @param key        键
      * @param map        对应多个键值
      * @param expireTime 时间(秒)
-     * @ return   Boolean.TRUE成功, false失败
+     * @ return   true成功, false失败
      */
     Boolean hashPutAll(String key, Map<String, Object> map, Long expireTime);
 
@@ -155,7 +140,7 @@ public interface RedisClient {
      * @param item       项
      * @param value      值
      * @param expireTime 时间(秒)  注意:如果已存在的hash表有时间,这里将会替换原有的时间
-     * @ return   Boolean.TRUE成功, false失败
+     * @ return   true成功, false失败
      */
     Boolean hashPut(String key, String item, Object value, Long expireTime);
 
