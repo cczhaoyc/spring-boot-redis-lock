@@ -2,6 +2,7 @@ package com.suxia.cc.mybatis.user.mapper;
 
 import com.suxia.cc.mybatis.user.domain.SysUser;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * <p>
@@ -13,6 +14,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface SysUserMapper extends BaseMapper<SysUser> {
 
-    SysUser getByName(String name);
-    
+    SysUser getByName(@Param("name") String name);
+
 }

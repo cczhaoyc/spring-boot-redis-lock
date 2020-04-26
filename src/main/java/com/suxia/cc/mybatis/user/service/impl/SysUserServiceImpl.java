@@ -1,7 +1,7 @@
 package com.suxia.cc.mybatis.user.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.suxia.cc.mybatis.exception.ServiceException;
 import com.suxia.cc.mybatis.user.domain.SysUser;
 import com.suxia.cc.mybatis.user.mapper.SysUserMapper;
 import com.suxia.cc.mybatis.user.service.SysUserService;
@@ -25,7 +25,11 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Override
     public SysUser getByName(String name) {
-        return sysUserMapper.getByName(name);
+        try {
+            return sysUserMapper.getByName(name);
+        } catch (Exception e) {
+            throw new ServiceException("", e);
+        }
     }
 
 

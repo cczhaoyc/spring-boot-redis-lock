@@ -4,10 +4,7 @@ package com.suxia.cc.mybatis.user.controller;
 import com.suxia.cc.mybatis.user.domain.SysUser;
 import com.suxia.cc.mybatis.user.service.SysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -30,13 +27,13 @@ public class SysUserController {
         return "Success";
     }
 
-    @GetMapping("/get")
-    public SysUser add(Long id) {
+    @GetMapping("/get/id/{id}")
+    public SysUser getById(@PathVariable("id") Long id) {
         return sysUserService.getById(id);
     }
 
-    @GetMapping("/get")
-    public SysUser add(String name) {
+    @GetMapping("/get/name/{name}")
+    public SysUser getByName(@PathVariable("name") String name) {
         return sysUserService.getByName(name);
     }
 

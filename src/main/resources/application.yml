@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: suxia-dream
+  profiles:
+    active: dev
 
   rabbitmq:
     host: localhost

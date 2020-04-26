@@ -1,0 +1,7 @@
+# 开发环境
+server:
+  port: 9091
+
+spring:
+  application:
+    name: suxia-dream-dev
