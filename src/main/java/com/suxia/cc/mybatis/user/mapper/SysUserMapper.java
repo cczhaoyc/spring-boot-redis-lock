@@ -2,6 +2,7 @@ package com.suxia.cc.mybatis.user.mapper;
 
 import com.suxia.cc.mybatis.user.domain.SysUser;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.suxia.cc.mybatis.user.vo.UserVO;
 import org.apache.ibatis.annotations.Param;
 
 /**

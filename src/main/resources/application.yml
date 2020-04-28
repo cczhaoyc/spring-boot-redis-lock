@@ -7,11 +7,20 @@ spring:
   profiles:
     active: dev
 
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10000000  #单个文件的最大上限
+      max-request-size: 100000000 #单个请求的文件总大小上限
+
   rabbitmq:
     host: localhost
     port: 5672
     username: guest
     password: guest
+    virtual-host: /
+    publisherConfirms: true
+    publisherReturns: true
 
   redis:
     key-prefix: his

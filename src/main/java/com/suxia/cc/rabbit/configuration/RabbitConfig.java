@@ -1,9 +1,6 @@
 package com.suxia.cc.rabbit.configuration;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -14,9 +11,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
 /**
- * @author zychao950224@dingtalk.com
+ * @author cczhaoyc@163.com
  * @version v_1.0.0
- * @description Broker:它提供一种传输服务,它的角色就是维护一条从生产者到消费者的路线，保证数据能按照指定的方式进行传输,
+ * @description Rabbit基础配置
+ * Broker:它提供一种传输服务,它的角色就是维护一条从生产者到消费者的路线，保证数据能按照指定的方式进行传输,
  * Exchange：消息交换机,它指定消息按什么规则,路由到哪个队列。
  * Queue:消息的载体,每个消息都会被投到一个或多个队列。
  * Binding:绑定，它的作用就是把exchange和queue按照路由规则绑定起来.
@@ -32,102 +30,131 @@ public class RabbitConfig {
 
     @Value("${spring.rabbitmq.host}")
     private String host;
-
     @Value("${spring.rabbitmq.port}")
     private int port;
-
     @Value("${spring.rabbitmq.username}")
     private String username;
-
     @Value("${spring.rabbitmq.password}")
     private String password;
-
-
-    public static final String EXCHANGE_A = "my-mq-exchange_A";
-    public static final String EXCHANGE_B = "my-mq-exchange_B";
-    public static final String EXCHANGE_C = "my-mq-exchange_C";
-
-
-    public static final String QUEUE_A = "QUEUE_A";
-    public static final String QUEUE_B = "QUEUE_B";
-    public static final String QUEUE_C = "QUEUE_C";
-
-    public static final String ROUTINGKEY_A = "spring-boot-routingKey_A";
-    public static final String ROUTINGKEY_B = "spring-boot-routingKey_B";
-    public static final String ROUTINGKEY_C = "spring-boot-routingKey_C";
+    @Value("${spring.rabbitmq.virtual-host}")
+    private String virtualHost;
+    @Value("${spring.rabbitmq.publisherConfirms}")
+    private Boolean enableConfirm;
+    @Value("${spring.rabbitmq.publisherReturns}")
+    private Boolean enableReturn;
 
     @Bean
     public ConnectionFactory connectionFactory() {
         CachingConnectionFactory connectionFactory = new CachingConnectionFactory(host, port);
         connectionFactory.setUsername(username);
         connectionFactory.setPassword(password);
-        connectionFactory.setVirtualHost("/");
-        connectionFactory.setPublisherConfirms(true);
+        connectionFactory.setVirtualHost(virtualHost);
+        connectionFactory.setPublisherConfirms(enableConfirm);
+        connectionFactory.setPublisherReturns(enableReturn);
         return connectionFactory;
     }
 
     /**
-     * 没有必须是prototype类型，rabbitTemplate是thread safe的，主要是channel不能共用，
-     * 但是在rabbitTemplate源码里channel是threadlocal的，所以singleton没问题。
-     * 但是rabbitTemplate要设置回调类，如果是singleton，
-     * 回调类就只能有一个，所以如果想要设置不同的回调类，就要设置为prototype的scope。
+     * 如果想要设置不同的回调类，就要设置为prototype的scope。
      */
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    //必须是prototype类型
     public RabbitTemplate rabbitTemplate() {
-        RabbitTemplate template = new RabbitTemplate(this.connectionFactory());
-        return template;
+        return new RabbitTemplate(this.connectionFactory());
     }
 
     /**
-     * 针对消费者配置
-     * 1. 设置交换机类型
-     * 2. 将队列绑定到交换机
-     * FanoutExchange: 将消息分发到所有的绑定队列，无routingkey的概念
+     * 默认交换机
+     * <p>
+     * FanoutExchange: 将消息分发到所有的绑定队列，无routingKey的概念
      * HeadersExchange ：通过添加属性key-value匹配
-     * DirectExchange:按照routingkey分发到指定队列
+     * DirectExchange:按照routingKey分发到指定队列
      * TopicExchange:多关键字匹配
      */
     @Bean
-    public DirectExchange defaultExchange() {
-        return new DirectExchange(EXCHANGE_A);
+    public TopicExchange defaultTopicExchange() {
+        return new TopicExchange(RabbitConstant.EXCHANGE_A);
     }
 
-    @Bean
-    public DirectExchange directExchangeB() {
-        return new DirectExchange(EXCHANGE_B);
-    }
 
     /**
      * 获取队列A
-     *
-     * @return
      */
     @Bean
     public Queue queueA() {
-        return new Queue(QUEUE_A, true); //队列持久
+        return new Queue(RabbitConstant.QUEUE_A);
     }
 
     /**
      * 获取队列B
-     *
-     * @return
      */
     @Bean
     public Queue queueB() {
-        return new Queue(QUEUE_B, true); //队列持久
+        return new Queue(RabbitConstant.QUEUE_B);
     }
 
 
     @Bean
     public Binding bindingA() {
-        return BindingBuilder.bind(queueA()).to(defaultExchange()).with(RabbitConfig.ROUTINGKEY_A);
+        return BindingBuilder.bind(this.queueA()).to(defaultTopicExchange()).with(RabbitConstant.ROUTING_KEY_A);
     }
 
     @Bean
     public Binding bindingB() {
-        return BindingBuilder.bind(queueB()).to(directExchangeB()).with(RabbitConfig.ROUTINGKEY_B);
+        return BindingBuilder.bind(this.queueB()).to(defaultTopicExchange()).with(RabbitConstant.ROUTING_KEY_B);
+    }
+
+    /**
+     * 将routingKey绑定到指定交换机
+     *
+     * @param queueName    队列名称
+     * @param exchangeName 交换机名称
+     * @param exchangeType 交换机类型
+     * @param routingKey   路由key
+     */
+    public Binding createBinding(String queueName, String exchangeName, String exchangeType, String routingKey) {
+        if (ExchangeTypes.DIRECT.equals(exchangeType)) {
+            DirectExchange directExchange = (DirectExchange) createExchange(exchangeName, exchangeType);
+            return BindingBuilder.bind(this.createQueue(queueName)).to(directExchange).with(routingKey);
+        }
+        if (ExchangeTypes.TOPIC.equals(exchangeType)) {
+            TopicExchange topicExchange = (TopicExchange) createExchange(exchangeName, exchangeType);
+            return BindingBuilder.bind(this.createQueue(queueName)).to(topicExchange).with(routingKey);
+        }
+        return null;
+    }
+
+
+    /**
+     * 创建队列
+     *
+     * @param queueName 队列名称
+     */
+    public Queue createQueue(String queueName) {
+        return new Queue(queueName);
+    }
+
+    /**
+     * 创建交换机
+     *
+     * @param exchangeName 交换机名称
+     * @param exchangeType 交换机类型
+     * @return 交换机
+     */
+    public Exchange createExchange(String exchangeName, String exchangeType) {
+        Exchange exchange;
+        if (ExchangeTypes.DIRECT.equals(exchangeType)) {
+            exchange = new DirectExchange(exchangeName, true, false);
+        } else if (ExchangeTypes.TOPIC.equals(exchangeType)) {
+            exchange = new TopicExchange(exchangeName, true, false);
+        } else if (ExchangeTypes.FANOUT.equals(exchangeType)) {
+            exchange = new FanoutExchange(exchangeName, true, false);
+        } else if (ExchangeTypes.HEADERS.equals(exchangeType)) {
+            exchange = new HeadersExchange(exchangeName, true, false);
+        } else {
+            exchange = new CustomExchange(exchangeName, exchangeType, true, false);
+        }
+        return exchange;
     }
 
 }
